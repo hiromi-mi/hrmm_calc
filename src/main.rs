@@ -7,6 +7,12 @@ use std::io::prelude::*;
 enum Token {
     Plus,
     Minus,
+    Multiply,
+    Divide,
+    OpenParensis,
+    CloseParensis,
+    Int(u32),
+    Float(f32),
 }
 
 fn loadfile(path_str: &String) -> Vec<String> {
@@ -35,15 +41,25 @@ fn parse(path_str : &String) {
 }
 
 fn parse_line(parse_str: &String) -> Vec<Token>{
+    for a_char in parse_str.chars() {
+    }
     let chars : Vec<_> = parse_str.chars().collect();
     let mut token_vec : Vec<Token> = Vec::new();
-    for a_char in &chars {
+    for (index, a_char) in enumerate(&chars) {
         let a_token = match a_char {
-            '+' => Token::Plus,
-            _ => Token::Minus,
+            '+' => Some(Token::Plus),
+            '-' => Some(Token::Minus),
+            '*' => Some(Token::Multiply),
+            '/' => Some(Token::Divide),
+            '(' => Some(Token::OpenParensis),
+            ')' => Some(Token::CloseParensis),
+            ' ' => None,
+            a @ _ => None,
         };
 
-        token_vec.push(a_token);
+        if let Some(a_token_) = a_token {
+            token_vec.push(a_token_);
+        }
     }
     token_vec
 }
