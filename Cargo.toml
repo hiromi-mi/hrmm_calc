@@ -1,0 +1,6 @@
+[package]
+name = "hrmm_calc"
+version = "0.1.0"
+authors = ["hiromi-mi <hiromi hyphen mi at cat dot zaq dot jp>"]
+
+[dependencies]
