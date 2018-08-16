@@ -4,7 +4,12 @@ use std::path::Path;
 use std::env;
 use std::io::prelude::*;
 
-fn parse(path_str : &String) {
+enum Token {
+    Plus,
+    Minus,
+}
+
+fn loadfile(path_str: &String) -> Vec<String> {
     let path = Path::new(path_str);
     let display = path.display();
 
@@ -18,6 +23,29 @@ fn parse(path_str : &String) {
         Err(why) => panic!("Couldn't open"),
         Ok(_) => print!("contains:\n {}", string),
     }
+    string.split("\n").map(|x| x.to_string()).collect()
+}
+
+fn parse(path_str : &String) {
+    let result = loadfile(path_str);
+
+    for row in &result {
+        parse_line(row);
+    }
+}
+
+fn parse_line(parse_str: &String) -> Vec<Token>{
+    let chars : Vec<_> = parse_str.chars().collect();
+    let mut token_vec : Vec<Token> = Vec::new();
+    for a_char in &chars {
+        let a_token = match a_char {
+            '+' => Token::Plus,
+            _ => Token::Minus,
+        };
+
+        token_vec.push(a_token);
+    }
+    token_vec
 }
 
 fn main() {
