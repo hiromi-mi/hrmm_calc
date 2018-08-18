@@ -4,7 +4,7 @@ use std::path::Path;
 use std::env;
 use std::io::prelude::*;
 
-enum Token {
+pub enum Token {
     Plus,
     Minus,
     Multiply,
@@ -13,6 +13,7 @@ enum Token {
     CloseParensis,
     Int(u32),
     Float(f32),
+    String(String),
 }
 
 fn loadfile(path_str: &String) -> Vec<String> {
@@ -26,26 +27,75 @@ fn loadfile(path_str: &String) -> Vec<String> {
 
     let mut string = String::new();
     match file.read_to_string(&mut string) {
-        Err(why) => panic!("Couldn't open"),
+        Err(why) => panic!("Couldn't read files."),
         Ok(_) => print!("contains:\n {}", string),
     }
     string.split("\n").map(|x| x.to_string()).collect()
+    //string.split("\n").map(|x| x.to_string()).collect()
 }
 
 fn parse(path_str : &String) {
     let result = loadfile(path_str);
 
     for row in &result {
-        parse_line(row);
+        let lexer = Lexer::new(row);
+        lexer.parse_l();
     }
 }
 
-fn parse_line(parse_str: &String) -> Vec<Token>{
-    for a_char in parse_str.chars() {
+#[derive(Default)]
+pub struct Lexer {
+    chars: Vec<char>,
+    string: String,
+    pos: usize,
+}
+
+impl Lexer {
+    pub fn new(parse_str : &String) -> Lexer {
+        Lexer {chars : parse_str.chars().collect(), string : parse_str.clone(), pos : 0}
     }
+
+    pub fn parse_l(&self) -> Vec<Token> {
+        let mut tokens = Vec::new();
+        tokens.push(self.parse_next());
+        tokens
+    }
+
+    fn parse_next(&self) -> Token {
+        let a_char = self.chars[self.pos];
+        let a_token = match a_char {
+            '+' => Token::Plus,
+            '-' => Token::Minus,
+            '*' => Token::Multiply,
+            '/' => Token::Divide,
+            '(' => Token::OpenParensis,
+            ')' => Token::CloseParensis,
+            '"' => self.parse_string(),
+            '0'...'9' => self.parse_int(),
+            _ => unreachable!(),
+        };
+        a_token
+    }
+
+    fn parse_string(&self) -> Token {
+        Token::String("".to_string())
+    }
+
+    fn parse_int(&self) -> Token {
+        let lastindex;
+        for (index,item) in self.chars[self.pos,self.chars.len()].iter().enumerate() {
+            if !item.is_digit(10) {
+                lastindex = index-1+self.pos;
+            }
+        }
+        Token::Int(self.chars[self.pos,lastindex]::<str>::collect()::parse())
+    }
+}
+
+fn parse_line(parse_str: &str) -> Vec<Token>{
     let chars : Vec<_> = parse_str.chars().collect();
     let mut token_vec : Vec<Token> = Vec::new();
-    for (index, a_char) in enumerate(&chars) {
+    for (index, a_char) in chars.iter().enumerate() {
         let a_token = match a_char {
             '+' => Some(Token::Plus),
             '-' => Some(Token::Minus),
